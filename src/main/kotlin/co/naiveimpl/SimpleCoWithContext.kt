@@ -28,15 +28,38 @@ fun main() {
     val child = Context()
     val parent = Context()
 
+    val child2 = Context()
+    val parent2 = Context()
+
     parent.child = child
-    while(!parent.complete) {
-        Scheduler.schedule(listOf(parent.child!!))
-        if(!child.suspended) {
+    parent2.child = child2
+
+    run(parent) {
+        launch(parent.child!!) {
             println("DO STUFF")
-            child.finish()
+        }
+    }
+    run(parent2) {
+        launch(parent2.child!!) {
+            println("DO STUFF")
         }
     }
 
+}
+
+// Convert this into a builder
+fun run(context: Context, lambda: () -> Unit) {
+    while(!context.complete) {
+        Scheduler.schedule(listOf(context.child!!))
+        lambda()
+    }
+}
+
+fun launch(context: Context, lambda: () -> Unit) {
+    if(!context.complete && !context.suspended) {
+        lambda()
+        context.finish()
+    }
 }
 
 object Scheduler {
