@@ -25,15 +25,21 @@ fun main() {
     // I think  I need to build out the context first since I don't have code generation??
 
     val child = Context {
-        println("DO STUFF")
+        launch(it) {
+            println("DO STUFF")
+        }
     }
     val parent = Context()
 
     val child2 = Context {
-        println("DO STUFF HERE")
+        launch(it) {
+            println("DO STUFF 2")
+        }
     }
     val child3 = Context {
-        println("DO STUFF HERE")
+        launch(it) {
+            println("DO STUFF 3")
+        }
     }
     val parent2 = Context()
 
@@ -43,12 +49,12 @@ fun main() {
 
     run(parent) {
         parent.children.forEach {
-            launch(it, it.lambda)
+            it.lambda(it)
         }
     }
     run(parent2) {
         parent2.children.forEach {
-            launch(it, it.lambda)
+            it.lambda(it)
         }
     }
 
@@ -84,7 +90,7 @@ object Scheduler {
     }
 }
 
-class Context(val lambda: () -> Unit = {}) {
+class Context(val lambda: (Context) -> Unit = {}) {
     var complete = false
     var suspendTime: Long = -1
     var suspended = false
@@ -98,6 +104,6 @@ class Context(val lambda: () -> Unit = {}) {
 
     fun finish() {
         complete = true
-        parent?.complete = true
+        parent?.complete = parent?.children?.filter { !it.complete }?.size == 0
     }
 }
