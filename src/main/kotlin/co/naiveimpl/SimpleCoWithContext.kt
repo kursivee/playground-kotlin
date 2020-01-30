@@ -1,8 +1,5 @@
 package co.naiveimpl
 
-/**
- * Mental model of how I think delay would look?
- */
 fun main() {
 
     /**
@@ -25,23 +22,33 @@ fun main() {
 
      */
 
-    val child = Context()
+    // I think  I need to build out the context first since I don't have code generation??
+
+    val child = Context {
+        println("DO STUFF")
+    }
     val parent = Context()
 
-    val child2 = Context()
+    val child2 = Context {
+        println("DO STUFF HERE")
+    }
+    val child3 = Context {
+        println("DO STUFF HERE")
+    }
     val parent2 = Context()
 
-    parent.child = child
-    parent2.child = child2
+    parent.addChild(child)
+    parent2.addChild(child2)
+    parent2.addChild(child3)
 
     run(parent) {
-        launch(parent.child!!) {
-            println("DO STUFF")
+        parent.children.forEach {
+            launch(it, it.lambda)
         }
     }
     run(parent2) {
-        launch(parent2.child!!) {
-            println("DO STUFF")
+        parent2.children.forEach {
+            launch(it, it.lambda)
         }
     }
 
@@ -50,7 +57,7 @@ fun main() {
 // Convert this into a builder
 fun run(context: Context, lambda: () -> Unit) {
     while(!context.complete) {
-        Scheduler.schedule(listOf(context.child!!))
+        Scheduler.schedule(context.children)
         lambda()
     }
 }
@@ -77,16 +84,17 @@ object Scheduler {
     }
 }
 
-class Context {
+class Context(val lambda: () -> Unit = {}) {
     var complete = false
     var suspendTime: Long = -1
     var suspended = false
     var parent: Context? = null
-    var child: Context? = null
-        set(value) {
-            value!!.parent = this
-            field = value
-        }
+    var children: MutableList<Context> = mutableListOf()
+
+    fun addChild(child: Context) {
+        child.parent = this
+        children.add(child)
+    }
 
     fun finish() {
         complete = true
