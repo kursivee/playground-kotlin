@@ -13,7 +13,17 @@ kotlin {
     /* Targets configuration omitted. 
     *  To find out how to configure the targets, please follow the link:
     *  https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#setting-up-targets */
-
+    jvm()
+    iosArm64 {
+        binaries.framework {
+            baseName = "HelloMultiplatform"
+        }
+    }
+    iosX64 {
+        binaries.framework {
+            baseName = "HelloMultiplatform"
+        }
+    }
     sourceSets {
         commonMain {
             dependencies {
@@ -24,6 +34,13 @@ kotlin {
             dependencies {
                 implementation kotlin('test-common')
                 implementation kotlin('test-annotations-common')
+            }
+        }
+        // Default source set for JVM-specific sources and dependencies.
+        // Alternatively, jvmMain { ... } would work as well:
+        jvm().compilations.main.defaultSourceSet {
+            dependencies {
+                implementation kotlin('stdlib-jdk8')
             }
         }
     }
