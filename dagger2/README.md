@@ -12,3 +12,5 @@ Playing around with dagger2 subcomponents. Verdict is probably not able to use s
 ```
 interface ApplicationComponent: FeatureGraph.Graph // Must manually remove graph
 ```
+
+But theoretically, you should be able to generate the application component based on the Graphs loaded within the dependencies... but probably something worth investigating in the future. There's a much easier/proven way by defining a component in base.
